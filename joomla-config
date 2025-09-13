@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s lastpipe nullglob dotglob
+
+declare -r app_name="${0##*/}"
+
+main() {
+    declare opt_file
+
+    while [[ $# -gt 0 ]]; do
+        case "${1:-}" in
+        --)
+            shift
+            break
+            ;;
+        -f | --file)
+            opt_file="${2}"
+            shift 2
+            ;;
+        -h | --help)
+            help
+            ;;
+        -*)
+            unknown_option "${1}"
+            ;;
+        *)
+            break
+            ;;
+        esac
+    done
+
+    # declare -r task="${1:-list}"
+    # shift || true
+    #
+    declare -r configuration="$(realpath -L "${opt_file:-"${PWD}/configuration.php"}")"
+    if [[ ! -f "${configuration}" ]]; then
+        fail "configuration file not found: ${configuration}"
+    fi
+
+    case "$#" in
+    0)
+        config_list
+        ;;
+    1)
+        config_get "$@"
+        ;;
+    2)
+        config_set "$@"
+        ;;
+    *)
+        fail 'too many arguments'
+        ;;
+    esac
+}
+
+config_get() {
+    declare -r name="${1}"
+
+    sed -En -e "s|.*\\\$${name}\s*=\s*'?([^']*)'?\s*;|\1|p" "${configuration}"
+}
+
+config_set() {
+    declare -r name="${1}"
+    declare -r value="${2}"
+
+    sed -Ei -e "s|(\\\$${name}\s+=\s+'?)[^']*('?\s*;)|\1${value}\2|" "${configuration}"
+}
+
+config_list() {
+    sed -En -e "s|.*\\\$(\w+)\s+=\s+'?([^']*)'?\s*;|\1: \2|p" "${configuration}"
+}
+
+help() {
+    echo -n "Manage Joomla! configuration values. (c) PopArtDesign, https://popartdesign.ru
+
+Usage: ${app_name} [-f|--file <file>] [<name>] [<value>]
+
+Arguments:
+  <name>             Optional. The name of a configuration variable.
+                     E.g.: 'db', 'user', 'debug'.
+  <value>            Optional. The value of a configuration variable.
+                     E.g.: 1, true, 'pAsSwOrD'.
+
+Options:
+  -f, --file <file>  Specify configuration file (default: ./configuration.php).
+  -h, --help         Show this help message and exit.
+
+Examples:
+  ${app_name}                                # List all configuration values
+  ${app_name} host                           # Get the database host value
+  ${app_name} host localhost                 # Set the database host to localhost
+  ${app_name} -f /path/to/configuration.php  # Use a specific configuration file
+"
+    exit 0
+}
+
+unknown_option() {
+    fail "unknown option '${1}'
+Try '${app_name} --help' for more information."
+}
+
+value_required() {
+    fail "value required '${1}'
+Try '${app_name} --help' for more information."
+}
+
+fail() {
+    error "${1}"
+    exit "${2:-1}"
+}
+
+error() {
+    echo "${app_name}: ${1}" >&2
+}
+
+main "$@"
