@@ -73,7 +73,7 @@ check_production_settings() {
 
         if [[ "${current_value}" == "not_found" ]]; then
             show_warning "Setting '${setting}' not found in configuration"
-            ((issues_found++))
+            ((issues_found += 1))
         elif [[ "${current_value}" != "${expected_value}" ]]; then
             show_issue "${message}" "${current_value}" "${expected_value}"
             ((issues_found += 1))
@@ -88,17 +88,29 @@ check_production_settings() {
 
     if [[ "${tmp_path}" == "not_found" ]]; then
         show_warning "tmp_path not found in configuration"
-        ((issues_found++))
+        ((issues_found += 1))
     elif [[ ! "${tmp_path}" =~ ^/ ]] && [[ ! "${tmp_path}" =~ ^[A-Za-z]:/ ]]; then
         # Relative path - check if it's the recommended relative path
         if [[ "${tmp_path}" != "tmp" ]] && [[ "${tmp_path}" != "./tmp" ]]; then
             show_issue "tmp_path should be 'tmp' or './tmp' for relative paths" "${tmp_path}" "tmp"
-            ((issues_found++))
+            ((issues_found += 1))
+        else
+            # Check if directory exists
+            if [[ ! -d "${configuration%/*}/${tmp_path#/}" ]]; then
+                show_issue "tmp_path directory does not exist" "${tmp_path}" "tmp (directory should exist)"
+                ((issues_found += 1))
+            else
+                show_ok "tmp_path is properly configured (${tmp_path})"
+            fi
+        fi
+    else
+        # Absolute path - check if directory exists
+        if [[ ! -d "${tmp_path}" ]]; then
+            show_issue "tmp_path directory does not exist" "${tmp_path}" "directory should exist"
+            ((issues_found += 1))
         else
             show_ok "tmp_path is properly configured (${tmp_path})"
         fi
-    else
-        show_info "tmp_path is set to an absolute path (${tmp_path})"
     fi
 
     local log_path
@@ -106,21 +118,33 @@ check_production_settings() {
 
     if [[ "${log_path}" == "not_found" ]]; then
         show_warning "log_path not found in configuration"
-        ((issues_found++))
+        ((issues_found += 1))
     elif [[ ! "${log_path}" =~ ^/ ]] && [[ ! "${log_path}" =~ ^[A-Za-z]:/ ]]; then
         # Relative path - check if it's the recommended relative path
         if [[ "${log_path}" != "administrator/logs" ]] && [[ "${log_path}" != "./administrator/logs" ]]; then
             show_issue "log_path should be 'administrator/logs' or './administrator/logs' for relative paths" "${log_path}" "administrator/logs"
-            ((issues_found++))
+            ((issues_found += 1))
+        else
+            # Check if directory exists
+            if [[ ! -d "${configuration%/*}/${log_path#/}" ]]; then
+                show_issue "log_path directory does not exist" "${log_path}" "administrator/logs (directory should exist)"
+                ((issues_found += 1))
+            else
+                show_ok "log_path is properly configured (${log_path})"
+            fi
+        fi
+    else
+        # Absolute path - check if directory exists
+        if [[ ! -d "${log_path}" ]]; then
+            show_issue "log_path directory does not exist" "${log_path}" "directory should exist"
+            ((issues_found += 1))
         else
             show_ok "log_path is properly configured (${log_path})"
         fi
-    else
-        show_info "log_path is set to an absolute path (${log_path})"
     fi
 
     # Summary
-    if [[ $issues_found -eq 0 ]]; then
+    if [[ "${issues_found}" -eq 0 ]]; then
         echo
         echo "All production settings checks passed!"
     else
@@ -158,6 +182,13 @@ fix_production_settings() {
 
     echo "Setting log_path to 'administrator/logs'..."
     joomla-config -f "${configuration}" log_path administrator/logs || echo "Failed to set log_path"
+
+    # Create directories if they don't exist
+    echo "Creating tmp directory if it doesn't exist..."
+    mkdir -p "${configuration%/*}/tmp" || echo "Failed to create tmp directory"
+
+    echo "Creating logs directory if it doesn't exist..."
+    mkdir -p "${configuration%/*}/administrator/logs" || echo "Failed to create logs directory"
 
     echo "Production settings fixed!"
 }
