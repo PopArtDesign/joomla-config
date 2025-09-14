@@ -54,14 +54,15 @@ main() {
 config_get() {
     declare -r name="${1}"
 
-    config_values | while IFS=': ' read key value; do
-        if [[ "${key}" == "${name}" ]]; then
-            echo "${value}"
-            return
-        fi
-    done
+    declare -A config=()
+    config_load
 
-    fail "'${name}' not found"
+    if ! [[ "${config[${name}]+_}" ]]; then
+        fail "'${name}' not found"
+    fi
+
+    unquote "${config[${name}]}"
+    echo
 }
 
 config_set() {
@@ -72,11 +73,31 @@ config_set() {
 }
 
 config_list() {
-    config_values | column -t -s : -l 2
+    declare -A config=()
+    config_load
+
+    for key in "${!config[@]}"; do
+        echo "${key}: $(unquote "${config[${key}]}")"
+    done | column -t -s : -l 2
 }
 
-config_values() {
-    sed -En -e "s|.*\\\$(\w+)\s*=\s*(.*)\s*;.*|\1: \2|p" "${configuration}"
+config_load() {
+    sed -En -e "s|.*\\\$(\w+)\s*=\s*(.*)\s*;.*|\1: \2|p" "${configuration}" |
+        while IFS=': ' read -r key value; do
+            config["${key}"]="${value}"
+        done
+}
+
+unquote() {
+    if is_quoted "${1}"; then
+        echo -n "${1:1:-1}"
+    else
+        echo -n "${1}"
+    fi
+}
+
+is_quoted() {
+    [[ "${1:0:1}" == '"' && "${1: -1}" == '"' ]] || [[ "${1:0:1}" == "'" && "${1: -1}" == "'" ]]
 }
 
 help() {
