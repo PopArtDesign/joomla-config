@@ -72,7 +72,7 @@ EOF
     When run ./joomla-production -f /tmp/test_configuration.php --fix
     The status should be success
     The output should include 'Checking Joomla! production settings'
-    The output should include 'Fixed 4 issue(s).'
+    The output should include 'Fixed 6 issue(s).'
 
     # Clean up
     rm -f /tmp/test_configuration.php

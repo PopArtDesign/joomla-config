@@ -108,6 +108,53 @@ check_production_settings() {
     fi
     echo
 
+    declare -r base_path="${configuration%%/configuration.php}"
+
+    # tmp_path
+    current_value="$(setting_get tmp_path)"
+    expected_value="${base_path}/tmp"
+    if [[ "${current_value}" == "not_found" ]]; then
+        show_warning "'tmp_path' not found in configuration"
+        ((issues_found += 1))
+    elif [[ ! -d "${current_value}" ]]; then
+        show_issue "'tmp_path' directory does not exist" \
+            "${current_value}" \
+            "${expected_value}"
+        ((issues_found += 1))
+
+        if [[ "${opt_fix}" == true ]]; then
+            setting_set tmp_path "${expected_value}" &&
+                ((issues_fixed += 1))
+        fi
+    else
+        show_ok "'tmp_path' directory exists (${current_value})"
+    fi
+    echo
+
+    # log_path
+    current_value="$(setting_get log_path)"
+    expected_value="${base_path}/administrator/logs"
+    [[ ! -d "${base_path}/administrator/logs" ]] && [[ -d "${base_path}/logs" ]] &&
+        expected_value="${base_path}/logs"
+
+    if [[ "${current_value}" == "not_found" ]]; then
+        show_warning "'log_path' not found in configuration"
+        ((issues_found += 1))
+    elif [[ ! -d "${current_value}" ]]; then
+        show_issue "'log_path' directory does not exist" \
+            "${current_value}" \
+            "${expected_value}"
+        ((issues_found += 1))
+
+        if [[ "${opt_fix}" == true ]]; then
+            setting_set log_path "${expected_value}" &&
+                ((issues_fixed += 1))
+        fi
+    else
+        show_ok "'log_path' directory exists (${current_value})"
+    fi
+    echo
+
     # Summary
     if [[ "${issues_found}" -eq 0 ]]; then
         echo "All production settings checks passed!"
