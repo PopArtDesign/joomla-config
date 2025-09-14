@@ -5,11 +5,11 @@ Describe 'joomla-config'
   It "lists all configuration values if no arguments provided"
     When run ./joomla-config -f ./spec/fixtures/configuration.php
     The status should be success
-    The output should include 'offline: 0'
-    The output should include 'sitename: Test Site'
-    The output should include 'host: localhost'
-    The output should include 'user: root'
-    The output should include 'db: test_joomla'
+    The output should match pattern '*offline*0*'
+    The output should match pattern '*sitename*Test Site*'
+    The output should match pattern '*host*localhost*'
+    The output should match pattern '*user*root*'
+    The output should match pattern '*db*test_joomla*'
     The lines of output should equal 62
   End
 
@@ -78,14 +78,15 @@ Describe 'joomla-config'
 
   It "shows error message if configuration file not exists"
     When run ./joomla-config -f /non/existent/file.php
-    The status should not be success
+    The status should be failure
     The stderr should include 'configuration file not found'
   End
 
-  It "returns empty output if configuration value not exists"
+  It "shows error message if configuration value not exists"
     When run ./joomla-config -f ./spec/fixtures/configuration.php nonexistent
-    The status should be success
+    The status should be failure
     The output should be blank
+    The stderr should include "joomla-config: 'nonexistent' not found"
   End
 
   It "shows error message with too many arguments"
