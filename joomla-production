@@ -48,149 +48,80 @@ main() {
 }
 
 check_production_settings() {
-    echo "Checking Joomla production settings..."
+    echo "Checking Joomla! production settings..."
+    echo
 
     if ! command -v joomla-config &>/dev/null; then
         fail "joomla-config command not found. Please make sure it's installed and in your PATH."
     fi
 
-    # Array of settings to check with their recommended production values
-    # Format: setting_name:current_value:recommended_value:description
-    local checks=(
-        "error_reporting:none:Error reporting should be set to 'none' in production"
-        "debug:0:Debug should be disabled in production"
-        "sef:1:SEF URLs should be enabled for better SEO"
-        "sef_rewrite:1:SEF rewrite should be enabled (requires web server configuration)"
-    )
+    declare issues_found=0
+    declare issues_fixed=0
 
-    local issues_found=0
+    declare current_value
+    declare expected_value
 
-    for check in "${checks[@]}"; do
-        IFS=':' read -r setting expected_value message <<<"${check}"
-
-        local current_value
-        current_value="$(joomla-config -f "${configuration}" "${setting}" 2>/dev/null)" || current_value="not_found"
-
-        if [[ "${current_value}" == "not_found" ]]; then
-            show_warning "Setting '${setting}' not found in configuration"
-            ((issues_found += 1))
-        elif [[ "${current_value}" != "${expected_value}" ]]; then
-            show_issue "${message}" "${current_value}" "${expected_value}"
-            ((issues_found += 1))
-        else
-            show_ok "${setting} is properly configured (${current_value})"
-        fi
-    done
-
-    # Check tmp_path and log_path
-    local tmp_path
-    tmp_path=$(joomla-config -f "${configuration}" "tmp_path" 2>/dev/null) || tmp_path="not_found"
-
-    if [[ "${tmp_path}" == "not_found" ]]; then
-        show_warning "tmp_path not found in configuration"
+    # error_reporting
+    current_value="$(setting_get error_reporting)"
+    expected_value=none
+    if ! setting_check error_reporting "${expected_value}" "${current_value}"; then
         ((issues_found += 1))
-    elif [[ ! "${tmp_path}" =~ ^/ ]] && [[ ! "${tmp_path}" =~ ^[A-Za-z]:/ ]]; then
-        # Relative path - check if it's the recommended relative path
-        if [[ "${tmp_path}" != "tmp" ]] && [[ "${tmp_path}" != "./tmp" ]]; then
-            show_issue "tmp_path should be 'tmp' or './tmp' for relative paths" "${tmp_path}" "tmp"
-            ((issues_found += 1))
-        else
-            # Check if directory exists
-            if [[ ! -d "${configuration%/*}/${tmp_path#/}" ]]; then
-                show_issue "tmp_path directory does not exist" "${tmp_path}" "tmp (directory should exist)"
-                ((issues_found += 1))
-            else
-                show_ok "tmp_path is properly configured (${tmp_path})"
-            fi
-        fi
-    else
-        # Absolute path - check if directory exists
-        if [[ ! -d "${tmp_path}" ]]; then
-            show_issue "tmp_path directory does not exist" "${tmp_path}" "directory should exist"
-            ((issues_found += 1))
-        else
-            show_ok "tmp_path is properly configured (${tmp_path})"
+
+        if [[ "${opt_fix}" == true ]]; then
+            setting_set error_reporting "${expected_value}" &&
+                ((issues_fixed += 1))
         fi
     fi
+    echo
 
-    local log_path
-    log_path=$(joomla-config -f "${configuration}" "log_path" 2>/dev/null) || log_path="not_found"
-
-    if [[ "${log_path}" == "not_found" ]]; then
-        show_warning "log_path not found in configuration"
+    # debug
+    current_value="$(setting_get debug)"
+    [[ "${current_value}" =~ 'false|true' ]] && expected_value='false' || expected_value=0
+    if ! setting_check debug "${expected_value}" "${current_value}"; then
         ((issues_found += 1))
-    elif [[ ! "${log_path}" =~ ^/ ]] && [[ ! "${log_path}" =~ ^[A-Za-z]:/ ]]; then
-        # Relative path - check if it's the recommended relative path
-        if [[ "${log_path}" != "administrator/logs" ]] && [[ "${log_path}" != "./administrator/logs" ]]; then
-            show_issue "log_path should be 'administrator/logs' or './administrator/logs' for relative paths" "${log_path}" "administrator/logs"
-            ((issues_found += 1))
-        else
-            # Check if directory exists
-            if [[ ! -d "${configuration%/*}/${log_path#/}" ]]; then
-                show_issue "log_path directory does not exist" "${log_path}" "administrator/logs (directory should exist)"
-                ((issues_found += 1))
-            else
-                show_ok "log_path is properly configured (${log_path})"
-            fi
-        fi
-    else
-        # Absolute path - check if directory exists
-        if [[ ! -d "${log_path}" ]]; then
-            show_issue "log_path directory does not exist" "${log_path}" "directory should exist"
-            ((issues_found += 1))
-        else
-            show_ok "log_path is properly configured (${log_path})"
+
+        if [[ "${opt_fix}" == true ]]; then
+            setting_set debug "${expected_value}" &&
+                ((issues_fixed += 1))
         fi
     fi
+    echo
+
+    # sef
+    current_value="$(setting_get sef)"
+    [[ "${current_value}" =~ 'false|true' ]] && expected_value='true' || expected_value=1
+    if ! setting_check sef "${expected_value}" "${current_value}"; then
+        ((issues_found += 1))
+
+        if [[ "${opt_fix}" == true ]]; then
+            setting_set sef "${expected_value}" &&
+                ((issues_fixed += 1))
+        fi
+    fi
+    echo
+
+    # sef_rewrite
+    current_value="$(setting_get sef_rewrite)"
+    [[ "${current_value}" =~ 'false|true' ]] && expected_value='true' || expected_value=1
+    if ! setting_check sef_rewrite "${expected_value}" "${current_value}"; then
+        ((issues_found += 1))
+
+        if [[ "${opt_fix}" == true ]]; then
+            setting_set sef_rewrite "${expected_value}" &&
+                ((issues_fixed += 1))
+        fi
+    fi
+    echo
 
     # Summary
     if [[ "${issues_found}" -eq 0 ]]; then
-        echo
         echo "All production settings checks passed!"
-    else
-        echo
+    elif [[ "${opt_fix}" == false ]]; then
         echo "Found ${issues_found} issue(s) that should be addressed for production."
-        if [[ "${opt_fix}" == false ]]; then
-            echo "Run with --fix option to automatically fix these issues."
-        fi
+        echo "Run with --fix option to automatically fix these issues."
+    else
+        echo "Fixed ${issues_fixed} issue(s)."
     fi
-
-    # If fix option is enabled, fix the issues
-    if [[ "${opt_fix}" == true ]]; then
-        echo
-        echo "Fixing issues..."
-        fix_production_settings
-    fi
-}
-
-fix_production_settings() {
-    # Fix each setting using joomla-config
-    echo "Setting error_reporting to 'none'..."
-    joomla-config -f "${configuration}" error_reporting none || echo "Failed to set error_reporting"
-
-    echo "Setting debug to '0'..."
-    joomla-config -f "${configuration}" debug 0 || echo "Failed to set debug"
-
-    echo "Setting sef to '1'..."
-    joomla-config -f "${configuration}" sef 1 || echo "Failed to set sef"
-
-    echo "Setting sef_rewrite to '1'..."
-    joomla-config -f "${configuration}" sef_rewrite 1 || echo "Failed to set sef_rewrite"
-
-    echo "Setting tmp_path to 'tmp'..."
-    joomla-config -f "${configuration}" tmp_path tmp || echo "Failed to set tmp_path"
-
-    echo "Setting log_path to 'administrator/logs'..."
-    joomla-config -f "${configuration}" log_path administrator/logs || echo "Failed to set log_path"
-
-    # Create directories if they don't exist
-    echo "Creating tmp directory if it doesn't exist..."
-    mkdir -p "${configuration%/*}/tmp" || echo "Failed to create tmp directory"
-
-    echo "Creating logs directory if it doesn't exist..."
-    mkdir -p "${configuration%/*}/administrator/logs" || echo "Failed to create logs directory"
-
-    echo "Production settings fixed!"
 }
 
 help() {
@@ -204,8 +135,8 @@ Options:
   -h, --help         Show this help message and exit.
 
 Examples:
-  ${app_name}                        # Check production settings
-  ${app_name} --fix                  # Check and fix production settings
+  ${app_name}                                      # Check production settings
+  ${app_name} --fix                                # Check and fix production settings
   ${app_name} -f /path/to/configuration.php --fix
 "
     exit 0
@@ -214,6 +145,36 @@ Examples:
 unknown_option() {
     fail "unknown option '${1}'
 Try '${app_name} --help' for more information."
+}
+
+setting_get() {
+    joomla-config -f "${configuration}" "${1}" 2>/dev/null || echo 'not_found'
+}
+
+setting_set() {
+    echo "Setting '${1} to '${2}'..."
+    joomla-config -f "${configuration}" "${1}" "${2}" || {
+        error "Failed to set ${1}"
+        return 1
+    }
+}
+
+setting_check() {
+    declare -r setting="${1}"
+    declare -r expected_value="${2}"
+    declare -r current_value="${3}"
+
+    if [[ "${current_value}" == "not_found" ]]; then
+        show_warning "'${setting}' not found in configuration"
+        return 1
+    elif [[ "${current_value}" != "${expected_value}" ]]; then
+        show_issue "'${setting}' should be set to '${expected_value}' in production" \
+            "${current_value}" \
+            "${expected_value}"
+        return 1
+    else
+        show_ok "'${setting}' is properly configured (${current_value})"
+    fi
 }
 
 show_ok() {
