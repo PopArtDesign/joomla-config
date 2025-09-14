@@ -30,9 +30,6 @@ main() {
         esac
     done
 
-    # declare -r task="${1:-list}"
-    # shift || true
-    #
     declare -r configuration="$(realpath -L "${opt_file:-"${PWD}/configuration.php"}")"
     if [[ ! -f "${configuration}" ]]; then
         fail "configuration file not found: ${configuration}"
