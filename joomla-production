@@ -34,26 +34,21 @@ main() {
         esac
     done
 
-    # Set default configuration file path
     declare -r configuration="$(realpath -L "${opt_file:-"${PWD}/configuration.php"}")"
-
-    # Check if configuration file exists
     if [[ ! -f "${configuration}" ]]; then
         fail "configuration file not found: ${configuration}"
     fi
 
-    # Run production checks
+    if ! command -v joomla-config &>/dev/null; then
+        fail "joomla-config command not found. Please make sure it's installed and in your PATH."
+    fi
+
     check_production_settings
-    exit 0
 }
 
 check_production_settings() {
     echo "Checking Joomla! production settings..."
     echo
-
-    if ! command -v joomla-config &>/dev/null; then
-        fail "joomla-config command not found. Please make sure it's installed and in your PATH."
-    fi
 
     declare issues_found=0
     declare issues_fixed=0
@@ -125,7 +120,7 @@ check_production_settings() {
 }
 
 help() {
-    echo "Check and fix Joomla production settings.
+    echo "Check and fix Joomla! production settings. (c) PopArtDesign, https://popartdesign.ru
 
 Usage: ${app_name} [-f|--file <file>] [--fix] [-h|--help]
 

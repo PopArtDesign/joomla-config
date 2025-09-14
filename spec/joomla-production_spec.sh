@@ -7,14 +7,14 @@ Describe 'joomla-production'
   It "shows help message with --help option"
     When run ./joomla-production --help
     The status should be success
-    The output should include 'Check and fix Joomla production settings.'
+    The output should include 'Check and fix Joomla! production settings.'
     The output should include 'Usage: joomla-production'
   End
 
   It "shows help message with -h option"
     When run ./joomla-production -h
     The status should be success
-    The output should include 'Check and fix Joomla production settings.'
+    The output should include 'Check and fix Joomla! production settings.'
     The output should include 'Usage: joomla-production'
   End
 
