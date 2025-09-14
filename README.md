@@ -1,5 +1,7 @@
 # joomla-config
 
+[![CI](https://github.com/PopArtDesign/joomla-config/actions/workflows/tests.yaml/badge.svg)](https://github.com/PopArtDesign/joomla-config/actions/workflows/tests.yaml)
+
 Bash script for managing [Joomla!](https://joomla.org) configuration values in `configuration.php` files.
 
 ## Installation
