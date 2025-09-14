@@ -62,6 +62,20 @@ Describe 'joomla-config'
     The output should equal "Test Site"
   End
 
+  It "shows help message with --help option"
+    When run ./joomla-config --help
+    The status should be success
+    The output should include 'Manage Joomla! configuration values.'
+    The output should include 'Usage: joomla-config'
+  End
+
+  It "shows help message with -h option"
+    When run ./joomla-config -h
+    The status should be success
+    The output should include 'Manage Joomla! configuration values.'
+    The output should include 'Usage: joomla-config'
+  End
+
   It "shows error message if configuration file not exists"
     When run ./joomla-config -f /non/existent/file.php
     The status should not be success
