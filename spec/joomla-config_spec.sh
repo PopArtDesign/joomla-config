@@ -51,6 +51,17 @@ Describe 'joomla-config'
     End
   End
 
+  It "uses configuration.php from current directory by default"
+    original_dir="${PWD}"
+
+    cd ./spec/fixtures
+    When run "${original_dir}/joomla-config" sitename
+    cd "${original_dir}"
+
+    The status should be success
+    The output should equal "Test Site"
+  End
+
   It "shows error message if configuration file not exists"
     When run ./joomla-config -f /non/existent/file.php
     The status should not be success
