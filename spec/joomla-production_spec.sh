@@ -2,6 +2,8 @@
 
 Describe 'joomla-production'
 
+  PATH="${PWD}:${PATH}"
+
   It "shows help message with --help option"
     When run ./joomla-production --help
     The status should be success
