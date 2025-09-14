@@ -71,7 +71,7 @@ check_production_settings() {
 
     # debug
     current_value="$(setting_get debug)"
-    [[ "${current_value}" =~ 'false|true' ]] && expected_value='false' || expected_value=0
+    [[ "${current_value}" =~ false|true ]] && expected_value='false' || expected_value=0
     if ! setting_check debug "${expected_value}" "${current_value}"; then
         ((issues_found += 1))
 
@@ -84,7 +84,7 @@ check_production_settings() {
 
     # sef
     current_value="$(setting_get sef)"
-    [[ "${current_value}" =~ 'false|true' ]] && expected_value='true' || expected_value=1
+    [[ "${current_value}" =~ false|true ]] && expected_value='true' || expected_value=1
     if ! setting_check sef "${expected_value}" "${current_value}"; then
         ((issues_found += 1))
 
@@ -97,7 +97,7 @@ check_production_settings() {
 
     # sef_rewrite
     current_value="$(setting_get sef_rewrite)"
-    [[ "${current_value}" =~ 'false|true' ]] && expected_value='true' || expected_value=1
+    [[ "${current_value}" =~ false|true ]] && expected_value='true' || expected_value=1
     if ! setting_check sef_rewrite "${expected_value}" "${current_value}"; then
         ((issues_found += 1))
 
