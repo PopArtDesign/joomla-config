@@ -54,7 +54,14 @@ main() {
 config_get() {
     declare -r name="${1}"
 
-    sed -En -e "s|.*\\\$${name}\s*=\s*'?([^']*)'?\s*;|\1|p" "${configuration}"
+    config_values | while IFS=': ' read key value; do
+        if [[ "${key}" == "${name}" ]]; then
+            echo "${value}"
+            return
+        fi
+    done
+
+    fail "'${name}' not found"
 }
 
 config_set() {
@@ -65,7 +72,11 @@ config_set() {
 }
 
 config_list() {
-    sed -En -e "s|.*\\\$(\w+)\s+=\s+'?([^']*)'?\s*;|\1: \2|p" "${configuration}"
+    config_values | column -t -s : -l 2
+}
+
+config_values() {
+    sed -En -e "s|.*\\\$(\w+)\s*=\s*(.*)\s*;.*|\1: \2|p" "${configuration}"
 }
 
 help() {
