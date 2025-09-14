@@ -50,7 +50,6 @@ main() {
 check_production_settings() {
     echo "Checking Joomla production settings..."
 
-    # Check if joomla-config is available
     if ! command -v joomla-config &>/dev/null; then
         fail "joomla-config command not found. Please make sure it's installed and in your PATH."
     fi
@@ -66,7 +65,6 @@ check_production_settings() {
 
     local issues_found=0
 
-    # Check each setting
     for check in "${checks[@]}"; do
         IFS=':' read -r setting expected_value message <<<"${check}"
 
@@ -74,15 +72,13 @@ check_production_settings() {
         current_value="$(joomla-config -f "${configuration}" "${setting}" 2>/dev/null)" || current_value="not_found"
 
         if [[ "${current_value}" == "not_found" ]]; then
-            echo "WARNING: Setting '${setting}' not found in configuration"
+            show_warning "Setting '${setting}' not found in configuration"
             ((issues_found++))
         elif [[ "${current_value}" != "${expected_value}" ]]; then
-            echo "ISSUE: ${message}"
-            echo "  Current value: ${current_value}"
-            echo "  Recommended value: ${expected_value}"
+            show_issue "${message}" "${current_value}" "${expected_value}"
             ((issues_found += 1))
         else
-            echo "OK: ${setting} is properly configured (${current_value})"
+            show_ok "${setting} is properly configured (${current_value})"
         fi
     done
 
@@ -91,40 +87,36 @@ check_production_settings() {
     tmp_path=$(joomla-config -f "${configuration}" "tmp_path" 2>/dev/null) || tmp_path="not_found"
 
     if [[ "${tmp_path}" == "not_found" ]]; then
-        echo "WARNING: tmp_path not found in configuration"
+        show_warning "tmp_path not found in configuration"
         ((issues_found++))
     elif [[ ! "${tmp_path}" =~ ^/ ]] && [[ ! "${tmp_path}" =~ ^[A-Za-z]:/ ]]; then
         # Relative path - check if it's the recommended relative path
         if [[ "${tmp_path}" != "tmp" ]] && [[ "${tmp_path}" != "./tmp" ]]; then
-            echo "ISSUE: tmp_path should be 'tmp' or './tmp' for relative paths"
-            echo "  Current value: ${tmp_path}"
-            echo "  Recommended value: tmp"
+            show_issue "tmp_path should be 'tmp' or './tmp' for relative paths" "${tmp_path}" "tmp"
             ((issues_found++))
         else
-            echo "OK: tmp_path is properly configured (${tmp_path})"
+            show_ok "tmp_path is properly configured (${tmp_path})"
         fi
     else
-        echo "INFO: tmp_path is set to an absolute path (${tmp_path})"
+        show_info "tmp_path is set to an absolute path (${tmp_path})"
     fi
 
     local log_path
     log_path=$(joomla-config -f "${configuration}" "log_path" 2>/dev/null) || log_path="not_found"
 
     if [[ "${log_path}" == "not_found" ]]; then
-        echo "WARNING: log_path not found in configuration"
+        show_warning "log_path not found in configuration"
         ((issues_found++))
     elif [[ ! "${log_path}" =~ ^/ ]] && [[ ! "${log_path}" =~ ^[A-Za-z]:/ ]]; then
         # Relative path - check if it's the recommended relative path
         if [[ "${log_path}" != "administrator/logs" ]] && [[ "${log_path}" != "./administrator/logs" ]]; then
-            echo "ISSUE: log_path should be 'administrator/logs' or './administrator/logs' for relative paths"
-            echo "  Current value: ${log_path}"
-            echo "  Recommended value: administrator/logs"
+            show_issue "log_path should be 'administrator/logs' or './administrator/logs' for relative paths" "${log_path}" "administrator/logs"
             ((issues_found++))
         else
-            echo "OK: log_path is properly configured (${log_path})"
+            show_ok "log_path is properly configured (${log_path})"
         fi
     else
-        echo "INFO: log_path is set to an absolute path (${log_path})"
+        show_info "log_path is set to an absolute path (${log_path})"
     fi
 
     # Summary
@@ -191,6 +183,24 @@ Examples:
 unknown_option() {
     fail "unknown option '${1}'
 Try '${app_name} --help' for more information."
+}
+
+show_ok() {
+    echo "OK: $*"
+}
+
+show_info() {
+    echo "INFO: $*"
+}
+
+show_warning() {
+    echo "WARNING: $*"
+}
+
+show_issue() {
+    echo "ISSUE: ${1}"
+    echo "  Current value: ${2}"
+    echo "  Recommended value: ${3}"
 }
 
 fail() {
