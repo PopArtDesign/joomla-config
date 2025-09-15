@@ -104,31 +104,41 @@ config_list() {
     config_load
 
     declare -ra db_options=(
-        db dbtype dbprefix host user password
+        dbtype db host user password dbprefix
         dbencryption dbsslverifyservercert dbsslkey dbsslcert dbsslca dbsslcipher
     )
 
     # Convert comma-separated fields to array if specified
     declare -a fields=()
     if [[ -n "${opt_fields}" ]]; then
-        IFS=',' read -ra fields <<< "${opt_fields}"
+        IFS=',' read -ra fields <<<"${opt_fields}"
     elif [[ "${opt_db}" -eq 1 ]]; then
         # If --db is used without --fields, populate fields with db_options
         fields=("${db_options[@]}")
     fi
 
-    for key in "${!config[@]}"; do
-        # Skip if fields are specified (either by --fields or --db) and key is not in specified fields
-        if [[ -n "${fields[*]}" ]] && ! [[ " ${fields[@]} " =~ " ${key} " ]]; then
-            continue
-        fi
-
-        if [[ "${opt_raw}" -eq 1 ]]; then
-            echo "${key}: ${config[${key}]}"
-        else
-            echo "${key}: $(unquote "${config[${key}]}")"
-        fi
-    done | column -t -s : -l 2
+    # If specific fields are requested, output them in the specified order
+    if [[ -n "${fields[*]}" ]]; then
+        for key in "${fields[@]}"; do
+            # Check if the field exists in the config
+            if [[ "${config[${key}]+_}" ]]; then
+                if [[ "${opt_raw}" -eq 1 ]]; then
+                    echo "${key}: ${config[${key}]}"
+                else
+                    echo "${key}: $(unquote "${config[${key}]}")"
+                fi
+            fi
+        done | column -t -s : -l 2
+    else
+        # No specific fields requested, output all fields in the order they appear in the file
+        for key in "${!config[@]}"; do
+            if [[ "${opt_raw}" -eq 1 ]]; then
+                echo "${key}: ${config[${key}]}"
+            else
+                echo "${key}: $(unquote "${config[${key}]}")"
+            fi
+        done | column -t -s : -l 2
+    fi
 }
 
 config_load() {
