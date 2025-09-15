@@ -81,9 +81,9 @@ config_set() {
     config_get "${name}" >/dev/null
 
     if [[ "${opt_raw}" -eq 1 ]]; then
-        sed -Ei -e "s|(\\${name}\s*=\s*).+(\s*;)|\1${value}\2|" "${configuration}"
+        sed -Ei -e "s|(\\\$${name}\s*=\s*).+(\s*;)|\1${value}\2|" "${configuration}"
     else
-        sed -Ei -e "s|(\\${name}\s*=\s*'?)[^']*('?\s*;)|\1'${value}'\2|" "${configuration}"
+        sed -Ei -e "s|(\\\$${name}\s*=\s*'?)[^']*('?\s*;)|\1'${value}'\2|" "${configuration}"
     fi
 }
 
