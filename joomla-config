@@ -45,6 +45,22 @@ main() {
         esac
     done
 
+    # If both --db and --fields are specified, add db fields to opt_fields
+    if [[ "${opt_db}" -eq 1 ]] && [[ -n "${opt_fields}" ]]; then
+        declare -ra db_options=(
+            db dbtype dbprefix host user password
+            dbencryption dbsslverifyservercert dbsslkey dbsslcert dbsslca dbsslcipher
+        )
+        # Convert array to comma-separated string
+        declare db_fields=""
+        declare separator=""
+        for field in "${db_options[@]}"; do
+            db_fields+="${separator}${field}"
+            separator=","
+        done
+        opt_fields+=",${db_fields}"
+    fi
+
     declare -r configuration="$(realpath -L "${opt_file:-"${PWD}/configuration.php"}")"
     if [[ ! -f "${configuration}" ]]; then
         fail "configuration file not found: ${configuration}"
@@ -103,17 +119,18 @@ config_list() {
     declare -A config=()
     config_load
 
-    declare -ra db_options=(
-        dbtype db host user password dbprefix
-        dbencryption dbsslverifyservercert dbsslkey dbsslcert dbsslca dbsslcipher
-    )
-
     # Convert comma-separated fields to array if specified
     declare -a fields=()
     if [[ -n "${opt_fields}" ]]; then
-        IFS=',' read -ra fields <<<"${opt_fields}"
+        IFS=',' read -ra fields <<< "${opt_fields}"
+        # Remove duplicates while preserving order
+        mapfile -t fields < <(remove_duplicates "${fields[@]}")
     elif [[ "${opt_db}" -eq 1 ]]; then
         # If --db is used without --fields, populate fields with db_options
+        declare -ra db_options=(
+            db dbtype dbprefix host user password
+            dbencryption dbsslverifyservercert dbsslkey dbsslcert dbsslca dbsslcipher
+        )
         fields=("${db_options[@]}")
     fi
 
@@ -161,6 +178,22 @@ unquote() {
 
 is_quoted() {
     [[ "${1:0:1}" == '"' && "${1: -1}" == '"' ]] || [[ "${1:0:1}" == "'" && "${1: -1}" == "'" ]]
+}
+
+# Remove duplicate values from an array while preserving order
+remove_duplicates() {
+    declare -A seen=()
+    declare -a unique=()
+    
+    for item in "$@"; do
+        if [[ -z "${seen[${item}]+_}" ]]; then
+            unique+=("${item}")
+            seen["${item}"]=1
+        fi
+    done
+    
+    # Output the unique array
+    printf '%s\n' "${unique[@]}"
 }
 
 help() {
