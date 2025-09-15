@@ -73,7 +73,16 @@ Describe 'joomla-config'
       The output should be blank
 
       host="$(./joomla-config -f /tmp/joomla-config_configuration.php host)"
-      The value "${host}" should equal 'newhost'
+      The value "${host}" should equal "'newhost'"
+    End
+
+    It "sets a configuration value with --raw option"
+      When run ./joomla-config --raw -f /tmp/joomla-config_configuration.php debug true
+      The status should be success
+      The output should be blank
+
+      debug="$(./joomla-config --raw -f /tmp/joomla-config_configuration.php debug)"
+      The value "${debug}" should equal 'true'
     End
   End
 
