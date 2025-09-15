@@ -123,7 +123,7 @@ check_production_settings() {
         ((issues_found += 1))
 
         if [[ "${opt_fix}" == true ]]; then
-            setting_set tmp_path "${expected_value}" &&
+            setting_set_raw tmp_path "'${expected_value}'" &&
                 ((issues_fixed += 1))
         fi
     else
@@ -147,7 +147,7 @@ check_production_settings() {
         ((issues_found += 1))
 
         if [[ "${opt_fix}" == true ]]; then
-            setting_set log_path "${expected_value}" &&
+            setting_set_raw log_path "'${expected_value}'" &&
                 ((issues_fixed += 1))
         fi
     else
@@ -196,6 +196,14 @@ setting_get() {
 setting_set() {
     echo "Setting '${1} to '${2}'..."
     joomla-config -f "${configuration}" "${1}" "${2}" || {
+        error "Failed to set ${1}"
+        return 1
+    }
+}
+
+setting_set_raw() {
+    echo "Setting '${1} to '${2}'..."
+    joomla-config --raw -f "${configuration}" "${1}" "${2}" || {
         error "Failed to set ${1}"
         return 1
     }
