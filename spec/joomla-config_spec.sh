@@ -13,6 +13,16 @@ Describe 'joomla-config'
     The lines of output should equal 62
   End
 
+  It "lists all configuration values with --raw option"
+    When run ./joomla-config --raw -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "sitename                  'Test Site'"
+    The output should include "host                      'localhost'"
+    The output should include "user                      'root'"
+    The output should include "db                        'test_joomla'"
+    The lines of output should equal 62
+  End
+
   Describe "getting a single configuration value"
     Parameters
       'offline'  '0'
@@ -24,6 +34,22 @@ Describe 'joomla-config'
 
     It "gets the '${1}' configuration value"
       When run ./joomla-config -f ./spec/fixtures/configuration.php "${1}"
+      The status should be success
+      The output should equal "${2}"
+    End
+  End
+
+  Describe "getting a single configuration value with --raw option"
+    Parameters
+      'offline'  "'0'"
+      'sitename' "'Test Site'"
+      'host'     "'localhost'"
+      'user'     "'root'"
+      'db'       "'test_joomla'"
+    End
+
+    It "gets the '${1}' configuration value with --raw"
+      When run ./joomla-config --raw -f ./spec/fixtures/configuration.php "${1}"
       The status should be success
       The output should equal "${2}"
     End

@@ -7,6 +7,7 @@ declare -r app_name="${0##*/}"
 
 main() {
     declare opt_file
+    declare opt_raw=0
 
     while [[ $# -gt 0 ]]; do
         case "${1:-}" in
@@ -17,6 +18,10 @@ main() {
         -f | --file)
             opt_file="${2}"
             shift 2
+            ;;
+        --raw)
+            opt_raw=1
+            shift
             ;;
         -h | --help)
             help
@@ -61,7 +66,11 @@ config_get() {
         fail "'${name}' not found"
     fi
 
-    unquote "${config[${name}]}"
+    if [[ "${opt_raw}" -eq 1 ]]; then
+        echo -n "${config[${name}]}"
+    else
+        unquote "${config[${name}]}"
+    fi
     echo
 }
 
@@ -81,7 +90,11 @@ config_list() {
     config_load
 
     for key in "${!config[@]}"; do
-        echo "${key}: $(unquote "${config[${key}]}")"
+        if [[ "${opt_raw}" -eq 1 ]]; then
+            echo "${key}: ${config[${key}]}"
+        else
+            echo "${key}: $(unquote "${config[${key}]}")"
+        fi
     done | column -t -s : -l 2
 }
 
@@ -110,7 +123,7 @@ is_quoted() {
 help() {
     echo -n "Manage Joomla! configuration values. (c) PopArtDesign, https://popartdesign.ru
 
-Usage: ${app_name} [-f|--file <file>] [<name>] [<value>]
+Usage: ${app_name} [--raw] [-f|--file <file>] [<name>] [<value>]
 
 Arguments:
   <name>             Optional. The name of a configuration variable.
@@ -119,12 +132,15 @@ Arguments:
                      E.g.: 1, true, 'pAsSwOrD'.
 
 Options:
+  --raw              Show values without quoting/unquoting.
   -f, --file <file>  Specify configuration file (default: ./configuration.php).
   -h, --help         Show this help message and exit.
 
 Examples:
   ${app_name}                                # List all configuration values
+  ${app_name} --raw                          # List all configuration values without quoting
   ${app_name} host                           # Get the database host value
+  ${app_name} --raw host                     # Get the database host value without unquoting
   ${app_name} host localhost                 # Set the database host to localhost
   ${app_name} -f /path/to/configuration.php  # Use a specific configuration file
 "
