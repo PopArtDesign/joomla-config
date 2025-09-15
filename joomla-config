@@ -9,6 +9,7 @@ main() {
     declare opt_file
     declare opt_raw=0
     declare opt_db=0
+    declare opt_fields=""
 
     while [[ $# -gt 0 ]]; do
         case "${1:-}" in
@@ -27,6 +28,10 @@ main() {
         --db)
             opt_db=1
             shift
+            ;;
+        --fields)
+            opt_fields="${2}"
+            shift 2
             ;;
         -h | --help)
             help
@@ -103,8 +108,20 @@ config_list() {
         dbencryption dbsslverifyservercert dbsslkey dbsslcert dbsslca dbsslcipher
     )
 
+    # Convert comma-separated fields to array if specified
+    declare -a fields=()
+    if [[ -n "${opt_fields}" ]]; then
+        IFS=',' read -ra fields <<< "${opt_fields}"
+    fi
+
     for key in "${!config[@]}"; do
+        # Skip if --db option is used and key is not in db_options
         if [[ "${opt_db}" -eq 1 ]] && ! [[ " ${db_options[@]} " =~ " ${key} " ]]; then
+            continue
+        fi
+
+        # Skip if --fields option is used and key is not in specified fields
+        if [[ -n "${opt_fields}" ]] && ! [[ " ${fields[@]} " =~ " ${key} " ]]; then
             continue
         fi
 
@@ -141,7 +158,7 @@ is_quoted() {
 help() {
     echo -n "Manage Joomla! configuration values. (c) PopArtDesign, https://popartdesign.ru
 
-Usage: ${app_name} [--raw] [--db] [-f|--file <file>] [<name>] [<value>]
+Usage: ${app_name} [--raw] [--db] [--fields <fields>] [-f|--file <file>] [<name>] [<value>]
 
 Arguments:
   <name>             Optional. The name of a configuration variable.
@@ -153,6 +170,8 @@ Options:
   --raw              Use values without quoting/unquoting. When setting values,
                      do not automatically quote the value.
   --db               Show only database-related configuration values.
+  --fields <fields>  Show only specified configuration fields (comma-separated).
+                     E.g.: --fields db,user,password
   -f, --file <file>  Specify configuration file (default: ./configuration.php).
   -h, --help         Show this help message and exit.
 
@@ -160,6 +179,7 @@ Examples:
   ${app_name}                                # List all configuration values
   ${app_name} --raw                          # List all configuration values without unquoting
   ${app_name} --db                           # List only database-related configuration values
+  ${app_name} --fields db,user,password      # List only specified fields
   ${app_name} host                           # Get the database host value
   ${app_name} --raw host                     # Get the database host value without unquoting
   ${app_name} host localhost                 # Set the database host to localhost

@@ -23,6 +23,15 @@ Describe 'joomla-config'
     The lines of output should equal 62
   End
 
+  It "lists only specified fields with --fields option"
+    When run ./joomla-config --fields db,user,password -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "db         test_joomla"
+    The output should include "user       root"
+    The output should include "password"
+    The lines of output should equal 3
+  End
+
   It "lists only database-related configuration values with --db option"
     When run ./joomla-config --db -f ./spec/fixtures/configuration.php
     The status should be success
