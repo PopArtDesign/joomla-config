@@ -5,11 +5,11 @@ Describe 'joomla-config'
   It "lists all configuration values if no arguments provided"
     When run ./joomla-config -f ./spec/fixtures/configuration.php
     The status should be success
-    The output should match pattern '*offline*0*'
-    The output should match pattern '*sitename*Test Site*'
-    The output should match pattern '*host*localhost*'
-    The output should match pattern '*user*root*'
-    The output should match pattern '*db*test_joomla*'
+    The output should include 'offline                   0'
+    The output should include 'sitename                  Test Site'
+    The output should include 'host                      localhost'
+    The output should include 'user                      root'
+    The output should include 'db                        test_joomla'
     The lines of output should equal 62
   End
 
