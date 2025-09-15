@@ -249,7 +249,12 @@ remove_duplicates() {
 help() {
     echo -n "Manage Joomla! configuration values. (c) PopArtDesign, https://popartdesign.ru
 
-Usage: ${app_name} [--raw] [--db] [--cors] [--mail] [--caching] [--cookie] [--debug] [--logging] [--metadata] [--proxy] [--seo] [--server] [--session] [--site] [--fields <fields>] [-f|--file <file>] [<name>] [<value>]
+Usage: ${app_name} [-f|--file <file>] [--raw] [--fields <fields>]
+                     [--db] [--cors] [--mail] [--caching] [--cookie]
+                     [--debug] [--logging] [--metadata] [--proxy]
+                     [--seo] [--server] [--session] [--site]
+       ${app_name} [-f|--file <file>] [--raw] <name>
+       ${app_name} [-f|--file <file>] [--raw] <name> <value>
 
 Arguments:
   <name>             Optional. The name of a configuration variable.
@@ -260,20 +265,20 @@ Arguments:
 Options:
   --raw              Use values without quoting/unquoting. When setting values,
                      do not automatically quote the value.
-  --db               Show only database-related configuration values.
-  --cors             Show only CORS-related configuration values.
-  --mail             Show only mail-related configuration values.
-  --caching          Show only caching-related configuration values.
-  --cookie           Show only cookie-related configuration values.
-  --debug            Show only debug-related configuration values.
-  --logging          Show only logging-related configuration values.
-  --metadata         Show only metadata-related configuration values.
-  --proxy            Show only proxy-related configuration values.
-  --seo              Show only SEO-related configuration values.
-  --server           Show only server-related configuration values.
-  --session          Show only session-related configuration values.
-  --site             Show only site-related configuration values.
-  --fields <fields>  Show only specified configuration fields (comma-separated).
+  --db               Show database-related configuration values.
+  --cors             Show CORS-related configuration values.
+  --mail             Show mail-related configuration values.
+  --caching          Show caching-related configuration values.
+  --cookie           Show cookie-related configuration values.
+  --debug            Show debug-related configuration values.
+  --logging          Show logging-related configuration values.
+  --metadata         Show metadata-related configuration values.
+  --proxy            Show proxy-related configuration values.
+  --seo              Show SEO-related configuration values.
+  --server           Show server-related configuration values.
+  --session          Show session-related configuration values.
+  --site             Show site-related configuration values.
+  --fields <fields>  Show specified configuration fields (comma-separated).
                      E.g.: --fields db,user,password
   -f, --file <file>  Specify configuration file (default: ./configuration.php).
   -h, --help         Show this help message and exit.
@@ -282,7 +287,7 @@ Examples:
   ${app_name}                                # List all configuration values
   ${app_name} --raw                          # List all configuration values without unquoting
   ${app_name} --db                           # List only database-related configuration values
-  ${app_name} --mail                         # List only mail-related configuration values
+  ${app_name} --db --mail                    # List only database and mail-related configuration values
   ${app_name} --fields db,user,password      # List only specified fields
   ${app_name} host                           # Get the database host value
   ${app_name} --raw host                     # Get the database host value without unquoting
