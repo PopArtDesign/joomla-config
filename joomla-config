@@ -69,10 +69,14 @@ config_set() {
     declare -r name="${1}"
     declare -r value="${2}"
 
+    config_get "${name}" >/dev/null
+
     sed -Ei -e "s|(\\\$${name}\s+=\s+'?)[^']*('?\s*;)|\1${value}\2|" "${configuration}"
 }
 
 config_list() {
+    declare key
+
     declare -A config=()
     config_load
 
@@ -82,6 +86,9 @@ config_list() {
 }
 
 config_load() {
+    declare key
+    declare value
+
     sed -En -e "s|.*\\\$(\w+)\s*=\s*(.*)\s*;.*|\1: \2|p" "${configuration}" |
         while IFS=': ' read -r key value; do
             config["${key}"]="${value}"

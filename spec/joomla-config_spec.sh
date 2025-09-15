@@ -82,8 +82,15 @@ Describe 'joomla-config'
     The stderr should include 'configuration file not found'
   End
 
-  It "shows error message if configuration value not exists"
+  It "shows error message if trying to get not existing config value"
     When run ./joomla-config -f ./spec/fixtures/configuration.php nonexistent
+    The status should be failure
+    The output should be blank
+    The stderr should include "joomla-config: 'nonexistent' not found"
+  End
+
+  It "shows error message if trying to set not existing config value"
+    When run ./joomla-config -f ./spec/fixtures/configuration.php nonexistent newvalue
     The status should be failure
     The output should be blank
     The stderr should include "joomla-config: 'nonexistent' not found"
