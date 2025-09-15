@@ -8,6 +8,7 @@ declare -r app_name="${0##*/}"
 main() {
     declare opt_file
     declare opt_raw=0
+    declare opt_db=0
 
     while [[ $# -gt 0 ]]; do
         case "${1:-}" in
@@ -21,6 +22,10 @@ main() {
             ;;
         --raw)
             opt_raw=1
+            shift
+            ;;
+        --db)
+            opt_db=1
             shift
             ;;
         -h | --help)
@@ -93,7 +98,16 @@ config_list() {
     declare -A config=()
     config_load
 
+    declare -ra db_options=(
+        db dbtype dbprefix host user password
+        dbencryption dbsslverifyservercert dbsslkey dbsslcert dbsslca dbsslcipher
+    )
+
     for key in "${!config[@]}"; do
+        if [[ "${opt_db}" -eq 1 ]] && ! [[ " ${db_options[@]} " =~ " ${key} " ]]; then
+            continue
+        fi
+
         if [[ "${opt_raw}" -eq 1 ]]; then
             echo "${key}: ${config[${key}]}"
         else
@@ -127,7 +141,7 @@ is_quoted() {
 help() {
     echo -n "Manage Joomla! configuration values. (c) PopArtDesign, https://popartdesign.ru
 
-Usage: ${app_name} [--raw] [-f|--file <file>] [<name>] [<value>]
+Usage: ${app_name} [--raw] [--db] [-f|--file <file>] [<name>] [<value>]
 
 Arguments:
   <name>             Optional. The name of a configuration variable.
@@ -138,12 +152,14 @@ Arguments:
 Options:
   --raw              Use values without quoting/unquoting. When setting values,
                      do not automatically quote the value.
+  --db               Show only database-related configuration values.
   -f, --file <file>  Specify configuration file (default: ./configuration.php).
   -h, --help         Show this help message and exit.
 
 Examples:
   ${app_name}                                # List all configuration values
   ${app_name} --raw                          # List all configuration values without unquoting
+  ${app_name} --db                           # List only database-related configuration values
   ${app_name} host                           # Get the database host value
   ${app_name} --raw host                     # Get the database host value without unquoting
   ${app_name} host localhost                 # Set the database host to localhost

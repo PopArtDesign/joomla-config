@@ -16,7 +16,7 @@ wget https://raw.githubusercontent.com/PopArtDesign/joomla-config/refs/heads/mai
 ## Usage
 
 ```
-joomla-config [--raw] [-f|--file <file>] [<name>] [<value>]
+joomla-config [--raw] [--db] [-f|--file <file>] [<name>] [<value>]
 ```
 
 ### Arguments
@@ -27,6 +27,7 @@ joomla-config [--raw] [-f|--file <file>] [<name>] [<value>]
 ### Options
 
 - `--raw`: Use values without quoting/unquoting. When setting values, do not automatically quote the value.
+- `--db`: Show only database-related configuration values.
 - `-f, --file <file>`: Specify configuration file (default: `./configuration.php`).
 - `-h, --help`:  Show the help message and exit.
 
@@ -35,6 +36,9 @@ joomla-config [--raw] [-f|--file <file>] [<name>] [<value>]
 ```bash
 # List all configuration values
 joomla-config
+
+# List only database-related configuration values
+joomla-config --db
 
 # Get the database host value
 joomla-config host

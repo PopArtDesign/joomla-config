@@ -23,6 +23,18 @@ Describe 'joomla-config'
     The lines of output should equal 62
   End
 
+  It "lists only database-related configuration values with --db option"
+    When run ./joomla-config --db -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "dbtype     mysqli"
+    The output should include "host       localhost"
+    The output should include "user       root"
+    The output should include "password"
+    The output should include "db         test_joomla"
+    The output should include "dbprefix   jos_"
+    The lines of output should equal 6
+  End
+
   Describe "getting a single configuration value"
     Parameters
       'offline'  '0'
