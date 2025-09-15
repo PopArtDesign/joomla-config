@@ -112,16 +112,14 @@ config_list() {
     declare -a fields=()
     if [[ -n "${opt_fields}" ]]; then
         IFS=',' read -ra fields <<< "${opt_fields}"
+    elif [[ "${opt_db}" -eq 1 ]]; then
+        # If --db is used without --fields, populate fields with db_options
+        fields=("${db_options[@]}")
     fi
 
     for key in "${!config[@]}"; do
-        # Skip if --db option is used and key is not in db_options
-        if [[ "${opt_db}" -eq 1 ]] && ! [[ " ${db_options[@]} " =~ " ${key} " ]]; then
-            continue
-        fi
-
-        # Skip if --fields option is used and key is not in specified fields
-        if [[ -n "${opt_fields}" ]] && ! [[ " ${fields[@]} " =~ " ${key} " ]]; then
+        # Skip if fields are specified (either by --fields or --db) and key is not in specified fields
+        if [[ -n "${fields[*]}" ]] && ! [[ " ${fields[@]} " =~ " ${key} " ]]; then
             continue
         fi
 
