@@ -80,7 +80,11 @@ config_set() {
 
     config_get "${name}" >/dev/null
 
-    sed -Ei -e "s|(\\\$${name}\s+=\s+'?)[^']*('?\s*;)|\1${value}\2|" "${configuration}"
+    if [[ "${opt_raw}" -eq 1 ]]; then
+        sed -Ei -e "s|(\\${name}\s*=\s*).+(\s*;)|\1${value}\2|" "${configuration}"
+    else
+        sed -Ei -e "s|(\\${name}\s*=\s*'?)[^']*('?\s*;)|\1'${value}'\2|" "${configuration}"
+    fi
 }
 
 config_list() {
@@ -132,13 +136,14 @@ Arguments:
                      E.g.: 1, true, 'pAsSwOrD'.
 
 Options:
-  --raw              Show values without quoting/unquoting.
+  --raw              Use values without quoting/unquoting. When setting values,
+                     do not automatically quote the value.
   -f, --file <file>  Specify configuration file (default: ./configuration.php).
   -h, --help         Show this help message and exit.
 
 Examples:
   ${app_name}                                # List all configuration values
-  ${app_name} --raw                          # List all configuration values without quoting
+  ${app_name} --raw                          # List all configuration values without unquoting
   ${app_name} host                           # Get the database host value
   ${app_name} --raw host                     # Get the database host value without unquoting
   ${app_name} host localhost                 # Set the database host to localhost
