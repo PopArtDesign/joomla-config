@@ -16,7 +16,7 @@ wget https://raw.githubusercontent.com/PopArtDesign/joomla-config/refs/heads/mai
 ## Usage
 
 ```
-joomla-config [--raw] [--db] [--fields <fields>] [-f|--file <file>] [<name>] [<value>]
+joomla-config [--raw] [--db] [--cors] [--mail] [--caching] [--cookie] [--debug] [--logging] [--metadata] [--proxy] [--seo] [--server] [--session] [--site] [--fields <fields>] [-f|--file <file>] [<name>] [<value>]
 ```
 
 ### Arguments
@@ -28,6 +28,18 @@ joomla-config [--raw] [--db] [--fields <fields>] [-f|--file <file>] [<name>] [<v
 
 - `--raw`: Use values without quoting/unquoting. When setting values, do not automatically quote the value.
 - `--db`: Show only database-related configuration values.
+- `--cors`: Show only CORS-related configuration values.
+- `--mail`: Show only mail-related configuration values.
+- `--caching`: Show only caching-related configuration values.
+- `--cookie`: Show only cookie-related configuration values.
+- `--debug`: Show only debug-related configuration values.
+- `--logging`: Show only logging-related configuration values.
+- `--metadata`: Show only metadata-related configuration values.
+- `--proxy`: Show only proxy-related configuration values.
+- `--seo`: Show only SEO-related configuration values.
+- `--server`: Show only server-related configuration values.
+- `--session`: Show only session-related configuration values.
+- `--site`: Show only site-related configuration values.
 - `--fields <fields>`: Show only specified configuration fields (comma-separated). E.g.: `--fields db,user,password`
 - `-f, --file <file>`: Specify configuration file (default: `./configuration.php`).
 - `-h, --help`:  Show the help message and exit.
@@ -40,6 +52,9 @@ joomla-config
 
 # List only database-related configuration values
 joomla-config --db
+
+# List only mail-related configuration values
+joomla-config --mail
 
 # List only specified fields
 joomla-config --fields db,user,password

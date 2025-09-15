@@ -44,6 +44,91 @@ Describe 'joomla-config'
     The lines of output should equal 6
   End
 
+  It "lists only mail-related configuration values with --mail option"
+    When run ./joomla-config --mail -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "mailonline   1"
+    The output should include "mailer       mail"
+    The output should include "mailfrom     test@example.com"
+    The output should include "fromname     Test Site"
+    The output should include "sendmail     /usr/sbin/sendmail"
+    The lines of output should equal 11
+  End
+
+  It "lists only debug-related configuration values with --debug option"
+    When run ./joomla-config --debug -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "debug             0"
+    The output should include "debug_lang        0"
+    The output should include "error_reporting   default"
+    The lines of output should equal 3
+  End
+
+  It "lists only caching-related configuration values with --caching option"
+    When run ./joomla-config --caching -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "caching                0"
+    The output should include "cache_handler          file"
+    The output should include "cachetime              15"
+    The output should include "cache_platformprefix   0"
+    The lines of output should equal 4
+  End
+
+  It "lists only seo-related configuration values with --seo option"
+    When run ./joomla-config --seo -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "sef            1"
+    The output should include "sef_rewrite    0"
+    The output should include "sef_suffix     0"
+    The output should include "unicodeslugs   0"
+    The lines of output should equal 4
+  End
+
+  It "lists only server-related configuration values with --server option"
+    When run ./joomla-config --server -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "gzip        0"
+    The output should include "offset      UTC"
+    The output should include "secret      secret123"
+    The output should include "tmp_path    /tmp"
+    The lines of output should equal 5
+  End
+
+  It "lists only site-related configuration values with --site option"
+    When run ./joomla-config --site -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "sitename                  Test Site"
+    The output should include "editor                    tinymce"
+    The output should include "access                    1"
+    The output should include "offline                   0"
+    The lines of output should equal 12
+  End
+
+  It "lists only session-related configuration values with --session option"
+    When run ./joomla-config --session -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "session_handler   database"
+    The output should include "lifetime          15"
+    The output should include "shared_session    0"
+    The lines of output should equal 3
+  End
+
+  It "lists only metadata-related configuration values with --metadata option"
+    When run ./joomla-config --metadata -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "MetaDesc"
+    The output should include "MetaAuthor    1"
+    The output should include "MetaVersion   0"
+    The lines of output should equal 4
+  End
+
+  It "lists only logging-related configuration values with --logging option"
+    When run ./joomla-config --logging -f ./spec/fixtures/configuration.php
+    The status should be success
+    The output should include "log_path   /var/log/joomla"
+    The lines of output should equal 1
+  End
+
   Describe "getting a single configuration value"
     Parameters
       'offline'  '0'
