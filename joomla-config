@@ -208,7 +208,7 @@ config_list() {
                     echo "${key}: $(unquote "${config[${key}]}")"
                 fi
             fi
-        done | column -t -s : -l 2
+        done | print_columns
     else
         # No specific fields requested, output all fields in the order they appear in the file
         for key in "${!config[@]}"; do
@@ -217,7 +217,7 @@ config_list() {
             else
                 echo "${key}: $(unquote "${config[${key}]}")"
             fi
-        done | column -t -s : -l 2
+        done | print_columns
     fi
 }
 
@@ -264,6 +264,15 @@ remove_duplicates() {
 
     # Output the unique array
     printf '%s\n' "${unique[@]}"
+}
+
+print_columns() {
+    if command -v column >/dev/null; then
+        column -t -s ':' -l 2
+    else
+        # fallback if column is not available
+        cat
+    fi
 }
 
 help() {
