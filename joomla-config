@@ -171,15 +171,9 @@ config_set() {
     if [[ "${opt_raw}" -eq 1 ]]; then
         sed -Ei -e "s|(\\\$${name}\s*=\s*)[^;]*;|\1${value};|" "${configuration}"
     else
-        declare old_raw_value="${config[${name}]}"
-        declare new_value="${value}"
+        declare -r quote="$(get_quoting "${config[${name}]}")"
 
-        declare quote_type="$(get_quote_type "${old_raw_value}")"
-
-        if [[ -n "${quote_type}" ]]; then
-            new_value="${quote_type}${value}${quote_type}"
-        fi
-        sed -Ei -e "s|(\\\$${name}\s*=\s*)[^;]*;|\1${new_value};|" "${configuration}"
+        sed -Ei -e "s|(\\\$${name}\s*=\s*)[^;]*;|\1${quote}${value}${quote};|" "${configuration}"
     fi
 }
 
@@ -232,15 +226,15 @@ config_load() {
 }
 
 unquote() {
-    declare -r quote_type="$(get_quote_type "${1}")"
-    if [[ -n "${quote_type}" ]]; then
+    declare -r quote="$(get_quoting "${1}")"
+    if [[ -n "${quote}" ]]; then
         echo -n "${1:1:-1}"
     else
         echo -n "${1}"
     fi
 }
 
-get_quote_type() {
+get_quoting() {
     if [[ "${1:0:1}" == '"' && "${1: -1}" == '"' ]]; then
         echo '"'
     elif [[ "${1:0:1}" == "'" && "${1: -1}" == "'" ]]; then
