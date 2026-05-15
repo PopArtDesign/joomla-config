@@ -262,7 +262,13 @@ remove_duplicates() {
 
 print_columns() {
     if command -v column >/dev/null; then
-        column -t -s ':' -l 2
+        if column -l 1 </dev/null >/dev/null 2>&1; then
+            # -l is supported
+            column -t -s ':' -l 2
+        else
+            # -l is not supported
+            column -t -s ':'
+        fi
     else
         # fallback if column is not available
         cat
