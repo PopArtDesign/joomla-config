@@ -171,13 +171,14 @@ config_set() {
     if [[ "${opt_raw}" -eq 1 ]]; then
         sed -Ei -e "s|(\\\$${name}\s*=\s*)[^;]*;|\1${value};|" "${configuration}"
     else
-        declare old_value="${config[${name}]}"
-
+        declare old_raw_value="${config[${name}]}"
         declare new_value="${value}"
-        if is_quoted "${old_value}"; then
-            new_value="'${value}'"
-        fi
 
+        declare quote_type="$(get_quote_type "${old_raw_value}")"
+
+        if [[ -n "${quote_type}" ]]; then
+            new_value="${quote_type}${value}${quote_type}"
+        fi
         sed -Ei -e "s|(\\\$${name}\s*=\s*)[^;]*;|\1${new_value};|" "${configuration}"
     fi
 }
@@ -231,15 +232,22 @@ config_load() {
 }
 
 unquote() {
-    if is_quoted "${1}"; then
+    declare -r quote_type="$(get_quote_type "${1}")"
+    if [[ -n "${quote_type}" ]]; then
         echo -n "${1:1:-1}"
     else
         echo -n "${1}"
     fi
 }
 
-is_quoted() {
-    [[ "${1:0:1}" == '"' && "${1: -1}" == '"' ]] || [[ "${1:0:1}" == "'" && "${1: -1}" == "'" ]]
+get_quote_type() {
+    if [[ "${1:0:1}" == '"' && "${1: -1}" == '"' ]]; then
+        echo '"'
+    elif [[ "${1:0:1}" == "'" && "${1: -1}" == "'" ]]; then
+        echo "'"
+    else
+        echo ""
+    fi
 }
 
 # Remove duplicate values from an array while preserving order
