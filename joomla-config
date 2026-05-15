@@ -161,19 +161,23 @@ config_set() {
     declare -r name="${1}"
     declare -r value="${2}"
 
-    config_get "${name}" >/dev/null
+    declare -A config=()
+    config_load
+
+    if ! [[ "${config[${name}]+_}" ]]; then
+        fail "'${name}' not found"
+    fi
 
     if [[ "${opt_raw}" -eq 1 ]]; then
         sed -Ei -e "s|(\\\$${name}\s*=\s*)[^;]*;|\1${value};|" "${configuration}"
     else
-        declare -A config=()
-        config_load
-        declare old_raw_value="${config[${name}]}"
+        declare old_value="${config[${name}]}"
 
         declare new_value="${value}"
-        if is_quoted "${old_raw_value}"; then
+        if is_quoted "${old_value}"; then
             new_value="'${value}'"
         fi
+
         sed -Ei -e "s|(\\\$${name}\s*=\s*)[^;]*;|\1${new_value};|" "${configuration}"
     fi
 }
