@@ -9,7 +9,7 @@ class JConfig {
 	public $captcha = '0';
 	public $list_limit = '20';
 	public $access = '1';
-	public $debug = '0';
+	public $debug = false;
 	public $debug_lang = '0';
 	public $dbtype = 'mysqli';
 	public $host = 'localhost';
@@ -54,7 +54,7 @@ class JConfig {
 	public $sef_rewrite = '0';
 	public $sef_suffix = '0';
 	public $unicodeslugs = '0';
-	public $feed_limit = '10';
+	public $feed_limit = 10;
 	public $feed_email = 'none';
 	public $log_path = '/var/log/joomla';
 	public $tmp_path = '/tmp';

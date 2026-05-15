@@ -164,9 +164,17 @@ config_set() {
     config_get "${name}" >/dev/null
 
     if [[ "${opt_raw}" -eq 1 ]]; then
-        sed -Ei -e "s|(\\\$${name}\s*=\s*).+(\s*;)|\1${value}\2|" "${configuration}"
+        sed -Ei -e "s|(\\\$${name}\s*=\s*)[^;]*;|\1${value};|" "${configuration}"
     else
-        sed -Ei -e "s|(\\\$${name}\s*=\s*'?)[^']*('?\s*;)|\1'${value}'\2|" "${configuration}"
+        declare -A config=()
+        config_load
+        declare old_raw_value="${config[${name}]}"
+
+        declare new_value="${value}"
+        if is_quoted "${old_raw_value}"; then
+            new_value="'${value}'"
+        fi
+        sed -Ei -e "s|(\\\$${name}\s*=\s*)[^;]*;|\1${new_value};|" "${configuration}"
     fi
 }
 

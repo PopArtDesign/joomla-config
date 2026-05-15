@@ -58,7 +58,7 @@ Describe 'joomla-config'
   It "lists only debug-related configuration values with --debug option"
     When run ./joomla-config --debug -f ./spec/fixtures/configuration.php
     The status should be success
-    The output should include "debug             0"
+    The output should include "debug             false"
     The output should include "debug_lang        0"
     The output should include "error_reporting   default"
     The lines of output should equal 3
@@ -179,7 +179,7 @@ Describe 'joomla-config'
       The output should be blank
 
       host="$(./joomla-config -f /tmp/joomla-config_configuration.php host)"
-      The value "${host}" should equal "'newhost'"
+      The value "${host}" should equal "newhost"
     End
 
     It "sets a configuration value with --raw option"
@@ -189,6 +189,24 @@ Describe 'joomla-config'
 
       debug="$(./joomla-config --raw -f /tmp/joomla-config_configuration.php debug)"
       The value "${debug}" should equal 'true'
+    End
+
+    It "sets a numeric configuration value as a number"
+      When run ./joomla-config -f /tmp/joomla-config_configuration.php feed_limit 12
+      The status should be success
+      The output should be blank
+
+      feed_limit="$(./joomla-config --raw -f /tmp/joomla-config_configuration.php feed_limit)"
+      The value "${feed_limit}" should equal "12"
+    End
+
+    It "sets a boolean configuration value as a boolean"
+      When run ./joomla-config -f /tmp/joomla-config_configuration.php debug true
+      The status should be success
+      The output should be blank
+
+      debug="$(./joomla-config --raw -f /tmp/joomla-config_configuration.php debug)"
+      The value "${debug}" should equal "true"
     End
   End
 
