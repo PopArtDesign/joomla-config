@@ -25,9 +25,9 @@ joomla-config [-f|--file <file>] [--raw] <name>
 
 joomla-config [-f|--file <file>] [--raw] <name> <value>
 
-joomla-config --completion
-
 joomla-config [-f|--file <file>] --list-keys
+
+joomla-config --completion
 ```
 
 ### Arguments
@@ -54,8 +54,8 @@ joomla-config [-f|--file <file>] --list-keys
 - `--keys <keys>`: Show specified configuration keys (comma-separated). E.g.: `--keys db,user,password`
 - `--list-keys`: List all available configuration keys.
 - `-f, --file <file>`: Specify configuration file (default: `./configuration.php`).
-- `-h, --help`:  Show the help message and exit.
 - `--completion`: Print bash completion script.
+- `-h, --help`:  Show the help message and exit.
 
 ### Examples
 
