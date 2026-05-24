@@ -233,7 +233,7 @@ config_list_keys() {
     declare -A config=()
     config_load
 
-    printf '%s\n' "${!config[@]}" | sort
+    printf '%s\n' "${!config[@]}" | sort -f
 }
 
 completion_script() {
