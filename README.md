@@ -16,7 +16,7 @@ wget https://raw.githubusercontent.com/PopArtDesign/joomla-config/refs/heads/mai
 ## Usage
 
 ```
-joomla-config [-f|--file <file>] [--raw] [--fields <fields>]
+joomla-config [-f|--file <file>] [--raw] [--keys <keys>]
               [--db] [--cors] [--mail] [--caching] [--cookie]
               [--debug] [--logging] [--metadata] [--proxy]
               [--seo] [--server] [--session] [--site]
@@ -25,7 +25,7 @@ joomla-config [-f|--file <file>] [--raw] <name>
 
 joomla-config [-f|--file <file>] [--raw] <name> <value>
 
-joomla-config [-f|--file <file>] --list-fields
+joomla-config [-f|--file <file>] --list-keys
 ```
 
 ### Arguments
@@ -49,8 +49,8 @@ joomla-config [-f|--file <file>] --list-fields
 - `--server`: Show server-related configuration values.
 - `--session`: Show session-related configuration values.
 - `--site`: Show  site-related configuration values.
-- `--fields <fields>`: Show specified configuration fields (comma-separated). E.g.: `--fields db,user,password`
-- `--list-fields`: List all available configuration fields.
+- `--keys <keys>`: Show specified configuration keys (comma-separated). E.g.: `--keys db,user,password`
+- `--list-keys`: List all available configuration keys.
 - `-f, --file <file>`: Specify configuration file (default: `./configuration.php`).
 - `-h, --help`:  Show the help message and exit.
 
@@ -66,8 +66,8 @@ joomla-config --db
 # List only database and mail-related configuration values
 joomla-config --db --mail
 
-# List only specified fields
-joomla-config --fields db,user,password
+# List only specified keys
+joomla-config --keys db,user,password
 
 # Get the database host value
 joomla-config host

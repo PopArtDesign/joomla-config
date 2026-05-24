@@ -23,8 +23,8 @@ Describe 'joomla-config'
     The lines of output should equal 62
   End
 
-  It "lists only specified fields with --fields option"
-    When run ./joomla-config --fields db,user,password -f ./spec/fixtures/configuration.php
+  It "lists only specified fields with --keys option"
+    When run ./joomla-config --keys db,user,password -f ./spec/fixtures/configuration.php
     The status should be success
     The output should include "db         test_joomla"
     The output should include "user       root"
@@ -261,9 +261,9 @@ Describe 'joomla-config'
     The stderr should include 'too many arguments'
   End
 
-  Describe '--list-fields option'
+  Describe '--list-keys option'
     It 'lists all field keys sorted alphabetically'
-      When run ./joomla-config --list-fields -f spec/fixtures/configuration.php
+      When run ./joomla-config --list-keys -f spec/fixtures/configuration.php
       The status should be success
       The output should eq "access
 asset_id
