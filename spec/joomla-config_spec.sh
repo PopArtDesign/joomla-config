@@ -267,9 +267,9 @@ Describe 'joomla-config'
       The status should be success
       The output should eq "access
 asset_id
+cachetime
 cache_handler
 cache_platformprefix
-cachetime
 caching
 captcha
 db
