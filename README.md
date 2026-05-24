@@ -87,13 +87,48 @@ joomla-config -f /path/to/configuration.php
 
 ## Bash Completion
 
-To enable bash completion for `joomla-config`, you can add the following to your `~/.bashrc` or `~/.bash_profile`:
+`joomla-config` includes a bash completion script to enhance your command-line experience.
+
+### Temporary Activation
+
+To enable bash completion for your current session, you can source the completion script directly:
 
 ```sh
 source <(joomla-config --completion)
 ```
 
-This will provide command-line completion for options and configuration keys.
+### Permanent Installation
+
+For permanent activation across all your shell sessions, you can save the completion script to a file and ensure it's sourced on startup.
+
+**Method 1: System-wide installation (requires root privileges)**
+
+Save the completion script to your system's bash completion directory:
+
+```sh
+sudo joomla-config --completion > /etc/bash_completion.d/joomla-config
+```
+
+Then, ensure your shell is configured to load scripts from this directory (often done automatically by `/etc/bash.bashrc` or similar).
+
+**Method 2: User-specific installation**
+
+Save the completion script to a file in your home directory, for example:
+
+```sh
+mkdir -p ~/.bash_completion.d
+joomla-config --completion > ~/.bash_completion.d/joomla-config
+```
+
+Then, add the following line to your `~/.bashrc` or `~/.bash_profile` to source it on startup:
+
+```sh
+if [ -f ~/.bash_completion.d/joomla-config ]; then
+    . ~/.bash_completion.d/joomla-config
+fi
+```
+
+After either method, restart your terminal or run `source ~/.bashrc` (or `~/.bash_profile`) for the changes to take effect. This will provide command-line completion for options and configuration keys.
 
 ## License
 
