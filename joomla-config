@@ -241,6 +241,25 @@ config_list_keys() {
     printf '%s\n' "${config_keys[@]}" | LC_ALL=C sort -f
 }
 
+config_load() {
+    declare key
+    declare value
+
+    # Clear arrays in the caller's scope
+    config=()
+    # Stores keys in the order they appear in the file, as associative arrays do not guarantee order.
+    config_keys=()
+
+    sed -En -e "s|.*\\\$(\w+)\s*=\s*(.*)\s*;.*|\1: \2|p" "${configuration}" |
+        while IFS=': ' read -r key value; do
+            # If the key is seen for the first time, add it to the ordered list
+            if [[ -z "${config[${key}]+_}" ]]; then
+                config_keys+=("${key}")
+            fi
+            config["${key}"]="${value}"
+        done
+}
+
 completion_script() {
     cat <<'EOF'
 _joomla_config_completion() {
@@ -323,25 +342,6 @@ _joomla_config_completion() {
 
 complete -F _joomla_config_completion joomla-config
 EOF
-}
-
-config_load() {
-    declare key
-    declare value
-
-    # Clear arrays in the caller's scope
-    config=()
-    # Stores keys in the order they appear in the file, as associative arrays do not guarantee order.
-    config_keys=()
-
-    sed -En -e "s|.*\\\$(\w+)\s*=\s*(.*)\s*;.*|\1: \2|p" "${configuration}" |
-        while IFS=': ' read -r key value; do
-            # If the key is seen for the first time, add it to the ordered list
-            if [[ -z "${config[${key}]+_}" ]]; then
-                config_keys+=("${key}")
-            fi
-            config["${key}"]="${value}"
-        done
 }
 
 unquote() {
