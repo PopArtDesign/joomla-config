@@ -193,17 +193,17 @@ config_list() {
     declare -A config=()
     config_load
 
-    # Convert comma-separated fields to array if specified
-    declare -a fields=()
+    # Convert comma-separated keys to array if specified
+    declare -a keys=()
     if [[ -n "${opt_keys}" ]]; then
-        IFS=',' read -ra fields <<<"${opt_keys}"
+        IFS=',' read -ra keys <<<"${opt_keys}"
         # Remove duplicates while preserving order
-        mapfile -t fields < <(remove_duplicates "${fields[@]}")
+        mapfile -t keys < <(remove_duplicates "${keys[@]}")
     fi
 
-    # If specific fields are requested, output them in the specified order
-    if [[ -n "${fields[*]}" ]]; then
-        for key in "${fields[@]}"; do
+    # If specific keys are requested, output them in the specified order
+    if [[ -n "${keys[*]}" ]]; then
+        for key in "${keys[@]}"; do
             # Check if the field exists in the config
             if [[ "${config[${key}]+_}" ]]; then
                 if [[ "${opt_raw}" -eq 1 ]]; then
@@ -214,7 +214,7 @@ config_list() {
             fi
         done | print_columns
     else
-        # No specific fields requested, output all fields in the order they appear in the file
+        # No specific keys requested, output all keys in the order they appear in the file
         for key in "${!config[@]}"; do
             if [[ "${opt_raw}" -eq 1 ]]; then
                 echo "${key}: ${config[${key}]}"
