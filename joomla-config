@@ -107,6 +107,10 @@ main() {
             opt_list_keys=1
             shift
             ;;
+        --completion)
+            completion_script
+            exit 0
+            ;;
         --keys)
             opt_keys+="${opt_keys:+,}${2}"
             shift 2
@@ -232,6 +236,90 @@ config_list_keys() {
     printf '%s\n' "${!config[@]}" | sort
 }
 
+completion_script() {
+    cat <<'EOF'
+_joomla_config_completion() {
+    local cur prev i
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    if [[ "$COMP_CWORD" -gt 0 ]]; then
+        prev="${COMP_WORDS[COMP_CWORD-1]}"
+    else
+        prev=""
+    fi
+
+    # Helper function to get --file argument from command line words
+    _get_file_arg() {
+        local i
+        for i in "${!COMP_WORDS[@]}"; do
+            if [[ "${COMP_WORDS[i]}" == "--file" || "${COMP_WORDS[i]}" == "-f" ]]; then
+                if [[ -v "COMP_WORDS[i+1]" && $((i+1)) -ne $COMP_CWORD ]]; then
+                    echo "--file ${COMP_WORDS[i+1]}"
+                    return
+                fi
+                break
+            fi
+        done
+    }
+
+    local opts="--raw --db --cors --mail --caching --cookie --debug --logging --metadata --proxy --seo --server --session --site --list-keys --keys --file --help --completion"
+
+    if [[ $cur == -* ]]; then
+        COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
+        return 0
+    fi
+
+    case "$prev" in
+        -f|--file)
+            COMPREPLY=( $(compgen -f -- "$cur") )
+            return 0
+            ;;
+        --keys)
+            local last_key_part="${cur##*,}"
+            local prefix="${cur%,*}"
+            if [[ "$prefix" == "$cur" ]]; then
+                prefix=""
+            else
+                prefix="$prefix,"
+            fi
+
+            local file_arg
+            file_arg=$(_get_file_arg)
+            local config_keys
+            config_keys=$(${COMP_WORDS[0]} $file_arg --list-keys 2>/dev/null)
+
+            local completions
+            completions=$(compgen -W "${config_keys}" -- "$last_key_part")
+
+            if [[ -n "$prefix" ]]; then
+                 COMPREPLY=( $(echo "${completions}" | sed "s/^/${prefix}/") )
+            else
+                 COMPREPLY=( $(echo "${completions}") )
+            fi
+            return 0
+            ;;
+    esac
+
+    local pos_arg_count=0
+    for ((i=1; i < COMP_CWORD; i++)); do
+        local word="${COMP_WORDS[i]}"
+        local prev_word="${COMP_WORDS[i-1]}"
+        if [[ "$word" == -* ]]; then continue; fi
+        case "$prev_word" in -f|--file|--keys) continue ;; esac
+        pos_arg_count=$((pos_arg_count + 1))
+    done
+
+    if [[ $pos_arg_count -eq 0 ]]; then
+        local file_arg=$(_get_file_arg)
+        local config_keys=$(${COMP_WORDS[0]} $file_arg --list-keys 2>/dev/null)
+        COMPREPLY=( $(compgen -W "${config_keys}" -- "$cur") )
+    fi
+}
+
+complete -F _joomla_config_completion joomla-config
+EOF
+}
+
 config_load() {
     declare key
     declare value
@@ -301,6 +389,7 @@ Usage: ${app_name} [-f|--file <file>] [--raw] [--keys <keys>]
                      [--seo] [--server] [--session] [--site]
        ${app_name} [-f|--file <file>] [--raw] <name>
        ${app_name} [-f|--file <file>] [--raw] <name> <value>
+       ${app_name} --completion
        ${app_name} [-f|--file <file>] --list-keys
 
 Arguments:
@@ -328,12 +417,14 @@ Options:
   --keys <keys>      Show specified configuration keys (comma-separated).
                      E.g.: --keys db,user,password
   --list-keys        List all available configuration keys.
+  --completion       Print bash completion script.
   -f, --file <file>  Specify configuration file (default: ./configuration.php).
   -h, --help         Show this help message and exit.
 
 Examples:
   ${app_name}                                # List all configuration values
   ${app_name} --raw                          # List all configuration values without unquoting
+  source <(${app_name} --completion)        # Enable bash completion
   ${app_name} --db                           # List only database-related configuration values
   ${app_name} --db --mail                    # List only database and mail-related configuration values
   ${app_name} --keys db,user,password        # List only specified keys
