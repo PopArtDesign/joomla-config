@@ -157,6 +157,7 @@ config_get() {
     declare -r name="${1}"
 
     declare -A config=()
+    declare -a config_keys=()
     config_load
 
     if ! [[ "${config[${name}]+_}" ]]; then
@@ -176,6 +177,7 @@ config_set() {
     declare -r value="${2}"
 
     declare -A config=()
+    declare -a config_keys=()
     config_load
 
     if ! [[ "${config[${name}]+_}" ]]; then
@@ -195,6 +197,7 @@ config_list() {
     declare key
 
     declare -A config=()
+    declare -a config_keys=()
     config_load
 
     # Convert comma-separated keys to array if specified
@@ -219,7 +222,8 @@ config_list() {
         done | print_columns
     else
         # No specific keys requested, output all keys in the order they appear in the file
-        for key in "${!config[@]}"; do
+        # Iterate over `config_keys` to preserve the original file order of keys.
+        for key in "${config_keys[@]}"; do
             if [[ "${opt_raw}" -eq 1 ]]; then
                 echo "${key}: ${config[${key}]}"
             else
@@ -231,9 +235,10 @@ config_list() {
 
 config_list_keys() {
     declare -A config=()
+    declare -a config_keys=()
     config_load
 
-    printf '%s\n' "${!config[@]}" | LC_ALL=C sort -f
+    printf '%s\n' "${config_keys[@]}" | LC_ALL=C sort -f
 }
 
 completion_script() {
@@ -324,8 +329,17 @@ config_load() {
     declare key
     declare value
 
+    # Clear arrays in the caller's scope
+    config=()
+    # Stores keys in the order they appear in the file, as associative arrays do not guarantee order.
+    config_keys=()
+
     sed -En -e "s|.*\\\$(\w+)\s*=\s*(.*)\s*;.*|\1: \2|p" "${configuration}" |
         while IFS=': ' read -r key value; do
+            # If the key is seen for the first time, add it to the ordered list
+            if [[ -z "${config[${key}]+_}" ]]; then
+                config_keys+=("${key}")
+            fi
             config["${key}"]="${value}"
         done
 }
