@@ -25,6 +25,8 @@ joomla-config [-f|--file <file>] [--raw] <name>
 
 joomla-config [-f|--file <file>] [--raw] <name> <value>
 
+joomla-config --completion
+
 joomla-config [-f|--file <file>] --list-keys
 ```
 
@@ -53,6 +55,7 @@ joomla-config [-f|--file <file>] --list-keys
 - `--list-keys`: List all available configuration keys.
 - `-f, --file <file>`: Specify configuration file (default: `./configuration.php`).
 - `-h, --help`:  Show the help message and exit.
+- `--completion`: Print bash completion script.
 
 ### Examples
 
@@ -81,6 +84,16 @@ joomla-config --raw host localhost
 # Use a specific configuration file
 joomla-config -f /path/to/configuration.php
 ```
+
+## Bash Completion
+
+To enable bash completion for `joomla-config`, you can add the following to your `~/.bashrc` or `~/.bash_profile`:
+
+```sh
+source <(joomla-config --completion)
+```
+
+This will provide command-line completion for options and configuration keys.
 
 ## License
 
