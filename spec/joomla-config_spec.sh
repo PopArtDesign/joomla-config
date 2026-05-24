@@ -260,4 +260,73 @@ Describe 'joomla-config'
     The status should not be success
     The stderr should include 'too many arguments'
   End
+
+  Describe '--list-fields option'
+    It 'lists all field keys sorted alphabetically'
+      When run ./joomla-config --list-fields -f spec/fixtures/configuration.php
+      The status should be success
+      The output should eq "access
+asset_id
+cache_handler
+cache_platformprefix
+cachetime
+caching
+captcha
+db
+dbprefix
+dbtype
+debug
+debug_lang
+display_offline_message
+editor
+error_reporting
+feed_email
+feed_limit
+fromname
+ftp_enable
+ftp_host
+ftp_pass
+ftp_port
+ftp_root
+ftp_user
+gzip
+helpurl
+host
+lifetime
+list_limit
+live_site
+log_path
+mailer
+mailfrom
+mailonline
+MetaAuthor
+MetaDesc
+MetaKeys
+MetaTitle
+MetaVersion
+offline
+offline_image
+offline_message
+offset
+password
+robots
+secret
+sef
+sef_rewrite
+sef_suffix
+sendmail
+session_handler
+shared_session
+sitename
+smtpauth
+smtphost
+smtppass
+smtpport
+smtpsecure
+smtpuser
+tmp_path
+unicodeslugs
+user"
+    End
+  End
 End

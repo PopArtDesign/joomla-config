@@ -24,6 +24,8 @@ joomla-config [-f|--file <file>] [--raw] [--fields <fields>]
 joomla-config [-f|--file <file>] [--raw] <name>
 
 joomla-config [-f|--file <file>] [--raw] <name> <value>
+
+joomla-config [-f|--file <file>] --list-fields
 ```
 
 ### Arguments
@@ -48,6 +50,7 @@ joomla-config [-f|--file <file>] [--raw] <name> <value>
 - `--session`: Show session-related configuration values.
 - `--site`: Show  site-related configuration values.
 - `--fields <fields>`: Show specified configuration fields (comma-separated). E.g.: `--fields db,user,password`
+- `--list-fields`: List all available configuration fields.
 - `-f, --file <file>`: Specify configuration file (default: `./configuration.php`).
 - `-h, --help`:  Show the help message and exit.
 

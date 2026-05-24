@@ -21,6 +21,7 @@ main() {
     declare opt_server=0
     declare opt_session=0
     declare opt_site=0
+    declare opt_list_fields=0
     declare opt_fields=""
 
     while [[ $# -gt 0 ]]; do
@@ -102,6 +103,10 @@ main() {
             opt_fields+="${opt_fields:+,}sitename,editor,captcha,list_limit,access,frontediting,helpurl,behind_loadbalancer,offline,offline_message,display_offline_message,offline_image,feed_limit,feed_email"
             shift
             ;;
+        --list-fields)
+            opt_list_fields=1
+            shift
+            ;;
         --fields)
             opt_fields+="${opt_fields:+,}${2}"
             shift 2
@@ -121,6 +126,11 @@ main() {
     declare -r configuration="$(realpath -L "${opt_file:-"${PWD}/configuration.php"}")"
     if [[ ! -f "${configuration}" ]]; then
         fail "configuration file not found: ${configuration}"
+    fi
+
+    if [[ "${opt_list_fields}" -eq 1 ]]; then
+        config_list_fields
+        exit 0
     fi
 
     case "$#" in
@@ -215,6 +225,13 @@ config_list() {
     fi
 }
 
+config_list_fields() {
+    declare -A config=()
+    config_load
+
+    printf '%s\n' "${!config[@]}" | sort
+}
+
 config_load() {
     declare key
     declare value
@@ -284,6 +301,7 @@ Usage: ${app_name} [-f|--file <file>] [--raw] [--fields <fields>]
                      [--seo] [--server] [--session] [--site]
        ${app_name} [-f|--file <file>] [--raw] <name>
        ${app_name} [-f|--file <file>] [--raw] <name> <value>
+       ${app_name} [-f|--file <file>] --list-fields
 
 Arguments:
   <name>             Optional. The name of a configuration variable.
@@ -309,6 +327,7 @@ Options:
   --site             Show site-related configuration values.
   --fields <fields>  Show specified configuration fields (comma-separated).
                      E.g.: --fields db,user,password
+  --list-fields      List all available configuration fields.
   -f, --file <file>  Specify configuration file (default: ./configuration.php).
   -h, --help         Show this help message and exit.
 
